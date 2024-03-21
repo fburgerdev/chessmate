@@ -5,22 +5,25 @@
 namespace Chessmate {
     // MoveFlag
     enum class MoveFlag {
-        None = 0, Normal, DoubleAdvance, EnPassant, CastleStateK, CastleStateQ, PromoteN, PromoteB, PromoteR, PromoteQ, ClaimDraw
+        None = 0, Normal, DoubleAdvance, EnPassant, CastleK, CastleQ, PromoteN, PromoteB, PromoteR, PromoteQ, ClaimDraw
     };
     // Move
     struct Move {
         // Constructor
         Move();
         Move(MoveFlag flag);
-        Move(Square origin, Square target);
-        Move(Square origin, Direction filedir, Direction rankdir);
-        Move(Square origin, Square target, MoveFlag flag);
+        Move(Piece piece, Square origin, Square target);
+        Move(Piece piece, Square origin, Direction filedir, Direction rankdir);
+        Move(Piece piece, Square origin, Square target, MoveFlag flag);
+        // Valid
+        bool isValid() const;
         // Compare
         bool operator==(const Move& other) const;
         bool operator!=(const Move& other) const;
-        // String
-        string toString(Piece piece = Piece()) const;
+        // Algebraic Notation (UCI Standard)
+        string toAlgebraicNotation() const;
         // Member
+        Piece piece;
         Square origin;
         Square target;
         MoveFlag flag;

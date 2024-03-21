@@ -64,9 +64,7 @@ namespace Chessmate {
         string legalmoves;
         for (const Move& move : board.getLegalMoves()) {
             legalmoves += '\"';
-            legalmoves += fromSquare(move.origin);
-            legalmoves += "->";
-            legalmoves += fromSquare(move.target);
+            legalmoves += move.toAlgebraicNotation();
             legalmoves += '\"';
             legalmoves += ',';
         }
@@ -78,7 +76,7 @@ namespace Chessmate {
         stream << ',';
         // Bot
         if (depth) {
-            stream << "bestmove:\"" << minimax(board, depth).move.toString() << "\"";
+            stream << "bestmove:\"" << minimax(board, depth).move.toAlgebraicNotation() << "\"";
         }
         stream << '}';
         return stream.str();

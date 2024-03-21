@@ -12,6 +12,8 @@ namespace Chessmate {
         // FEN
         void fromFEN(const string& fen);
         string toFEN() const;
+        // Algebraic Notation
+        Move fromAlgebraicNotation(string notation) const;
         // Square
         // Square :: Get / Set
         const Piece& get(Square square) const;
@@ -42,7 +44,8 @@ namespace Chessmate {
         // Check
         // Check :: FindPiece
         Square findPiece(Piece piece) const;
-        // Check :: IsSquareAttackedBy
+        // Check :: AttackingSquares
+        List<Square> getAttackingSquares(Square square, Player player) const;
         bool isSquareAttackedBy(Square square, Player player) const;
         // Check :: CanCaptureKing / IsKingAttacked
         bool canCaptureKing() const;

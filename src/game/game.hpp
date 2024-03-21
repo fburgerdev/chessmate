@@ -7,11 +7,14 @@ namespace Chessmate {
     public:
         // Constructor
         Game();
+        Game(const List<Move>& movelist);
         Game(const string& fen, bool drawclaimed = false);
         // Board
         Board& getBoard();
         const Board& getBoard() const;
+        const List<Board>& getBoardList() const;
         // Move
+        Board& doMove(const string& notation);
         Board& doMove(Move move);
         Board& undoMove();
         // Draw
@@ -21,7 +24,9 @@ namespace Chessmate {
         bool isGameOver() const;
     private:
         // Member
-        Stack<Board> m_boardhistory;
+        List<Board> m_boardhistory;
         bool m_drawclaimed;
     };
+    // PGN
+    Game fromPGN(const string& filepath);
 }

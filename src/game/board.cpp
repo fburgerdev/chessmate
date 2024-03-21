@@ -1,5 +1,6 @@
 #include "board.hpp"
 #include "string.hpp"
+#include <functional> // std::function
 #include <iostream> // Debug
 
 namespace Chessmate {
@@ -81,11 +82,11 @@ namespace Chessmate {
         else {
             set(move.target, get(move.origin));
         }
-        if (move.flag == MoveFlag::CastleStateK) {
+        if (move.flag == MoveFlag::CastleK) {
             set((active == Player::White) ? toSquare("f1") : toSquare("f8"), Piece(PieceType::Rook, active));
             set((active == Player::White) ? toSquare("h1") : toSquare("h8"), Piece());
         }
-        else if (move.flag == MoveFlag::CastleStateQ) {
+        else if (move.flag == MoveFlag::CastleQ) {
             set((active == Player::White) ? toSquare("d1") : toSquare("d8"), Piece(PieceType::Rook, active));
             set((active == Player::White) ? toSquare("a1") : toSquare("a8"), Piece());
         }
@@ -195,6 +196,122 @@ namespace Chessmate {
         fen += std::to_string(fullmove);
         return fen;
     }
+    // Board :: Algebraic Notation
+    Move Board::fromAlgebraicNotation(string notation) const {
+        // Castle
+        if (notation == "0-0" || notation == "O-O") {
+            if (active == Player::White) {
+                return Move(Piece(PieceType::King, active), toSquare("e1"), toSquare("g1"), MoveFlag::CastleK);
+            }
+            else {
+                return Move(Piece(PieceType::King, active), toSquare("e8"), toSquare("g8"), MoveFlag::CastleK);
+            }
+        }
+        else if (notation == "0-0-0" || notation == "O-O-O") {
+            if (active == Player::White) {
+                return Move(Piece(PieceType::King, active), toSquare("e1"), toSquare("c1"), MoveFlag::CastleQ);
+            }
+            else {
+                return Move(Piece(PieceType::King, active), toSquare("e8"), toSquare("c8"), MoveFlag::CastleQ);
+            }
+        }
+        // EnPassant
+        if (notation.find("e.p.") < string::npos) {
+            notation = notation.substr(0, notation.find("e.p."));
+        }
+        // Strip
+        string stripped;
+        for (char ch : notation) {
+            if (ch == ' ') {
+                break;
+            }
+            if (string("PNBRQKabcdefgh12345678").find(ch) < string::npos) {
+                stripped += ch;
+            }
+        }
+        // Promote
+        if (string("NBRQ").find(stripped.back()) < string::npos) {
+            Square target = toSquare(stripped.substr(stripped.length() - 3, 2));
+            Square origin = addSquare(target, 0, -pawndirection[active]);
+            if (stripped.back() == 'N') {
+                return Move(get(origin), origin, target, MoveFlag::PromoteN);
+            }
+            else if (stripped.back() == 'B') {
+                return Move(get(origin), origin, target, MoveFlag::PromoteB);
+            }
+            else if (stripped.back() == 'R') {
+                return Move(get(origin), origin, target, MoveFlag::PromoteR);
+            }
+            else {
+                return Move(get(origin), origin, target, MoveFlag::PromoteQ);
+            }
+        }
+        // Callback
+        std::function<bool(Move)> callback = [](Move move){ return false; };
+        Square target = toSquare(stripped.substr(stripped.length() - 2));
+        if (string("PNBRQK").find(stripped[0]) < string::npos) {
+            Piece piece = Piece(toPieceType(stripped[0]), active);
+            if (stripped.length() == 3) {
+                callback = [=](Move move) {
+                    return move.piece == piece && move.target == target;
+                };
+            }
+            else if (stripped.length() == 4) {
+                if (string("abcdefgh").find(stripped[1]) < string::npos) {
+                    int32 file = stripped[1] - 'a';
+                    callback = [=](Move move) {
+                        return move.piece == piece && getFile(move.origin) == file && move.target == target;
+                    };
+                }
+                else if (string("12345678").find(stripped[1]) < string::npos) {
+                    int32 rank = '8' - stripped[1];
+                    callback = [=](Move move) {
+                        return move.piece == piece && getRank(move.origin) == rank && move.target == target;
+                    };
+                }
+            }
+            else if (stripped.length() == 5) {
+                Square origin = toSquare(stripped.substr(1, 2));
+                callback = [=](Move move) {
+                    return move.piece == piece && move.origin == origin && move.target == target;
+                };
+            }
+        }
+        else {
+            if (stripped.length() == 2) {
+                callback = [=](Move move) {
+                    return move.piece.type == PieceType::Pawn && move.target == target;
+                };
+            }
+            else if (stripped.length() == 3) {
+                if (string("abcdefgh").find(stripped[0]) < string::npos) {
+                    int32 file = stripped[0] - 'a';
+                    callback = [=](Move move) {
+                        return getFile(move.origin) == file && move.target == target;
+                    };
+                }
+                else if (string("12345678").find(stripped[0]) < string::npos) {
+                    int32 rank = '8' - stripped[0];
+                    callback = [=](Move move) {
+                        return getRank(move.origin) == rank && move.target == target;
+                    };
+                }
+            }
+            else if (stripped.length() == 4) {
+                Square origin = toSquare(stripped.substr(0, 2));
+                callback = [=](Move move) {
+                    return move.origin == origin && move.target == target;
+                };
+            }
+        }
+        // LegalMoves
+        for (Move move : getLegalMoves()) {
+            if (callback(move)) {
+                return move;
+            }
+        }
+        return Move();
+    }
     // Board :: Square
     // Board :: Square :: Get / Set
     const Piece& Board::get(Square square) const {
@@ -257,32 +374,32 @@ namespace Chessmate {
                 if (type(square) == PieceType::Pawn) {
                     // Advance
                     if (inBoundsAndEmpty(square, 0, pawndirection[active])) {
-                        moveset.emplace_back(square, 0, pawndirection[active]);
+                        moveset.emplace_back(get(square), square, 0, pawndirection[active]);
                         // DoubleAdvance
                         if (getRank(square) == pawnstartingpos[active] && isEmpty(square, 0, pawndirection[active] * 2)) {
-                            moveset.emplace_back(square, 0, pawndirection[active] * 2);
+                            moveset.emplace_back(get(square), square, 0, pawndirection[active] * 2);
                         }
                     }
                     // Capture
                     if (inBoundsAndEnemy(square, 1, pawndirection[active])) {
-                        moveset.emplace_back(square, 1, pawndirection[active]);
+                        moveset.emplace_back(get(square), square, 1, pawndirection[active]);
                     }
                     if (inBoundsAndEnemy(square, -1, pawndirection[active])) {
-                        moveset.emplace_back(square, -1, pawndirection[active]);
+                        moveset.emplace_back(get(square), square, -1, pawndirection[active]);
                     }
                     // EnPassant
                     if (inBounds(square, 1, pawndirection[active]) && addSquare(square, 1, pawndirection[active]) == enpassant) {
-                        moveset.emplace_back(square, enpassant);
+                        moveset.emplace_back(get(square), square, enpassant);
                     }
                     else if (inBounds(square, 1, pawndirection[active]) && addSquare(square, -1, pawndirection[active]) == enpassant) {
-                        moveset.emplace_back(square, enpassant);
+                        moveset.emplace_back(get(square), square, enpassant);
                     }
                 }
                 // Knight
                 else if (type(square) == PieceType::Knight) {
                     for (const auto& direction : knightdirections) {
                         if (inBounds(square, direction[0], direction[1]) && !isFriendly(square, direction[0], direction[1])) {
-                            moveset.emplace_back(square, direction[0], direction[1]);
+                            moveset.emplace_back(get(square), square, direction[0], direction[1]);
                         }
                     }
                 }
@@ -293,10 +410,10 @@ namespace Chessmate {
                         for (int32 step = 1; step < 8; ++step) {
                             if (inBounds(square, direction[0] * step, direction[1] * step)) {
                                 if (isEmpty(square, direction[0] * step, direction[1] * step)) {
-                                    moveset.emplace_back(square, direction[0] * step, direction[1] * step);
+                                    moveset.emplace_back(get(square), square, direction[0] * step, direction[1] * step);
                                 }
                                 else if (isEnemy(square, direction[0] * step, direction[1] * step)) {
-                                    moveset.emplace_back(square, direction[0] * step, direction[1] * step);
+                                    moveset.emplace_back(get(square), square, direction[0] * step, direction[1] * step);
                                     break;
                                 }
                                 else {
@@ -314,7 +431,7 @@ namespace Chessmate {
                     // Normal
                     for (const auto& direction : kingdirections) {
                         if (inBounds(square, direction[0], direction[1]) && !isFriendly(square, direction[0], direction[1])) {
-                            moveset.emplace_back(square, direction[0], direction[1]);
+                            moveset.emplace_back(get(square), square, direction[0], direction[1]);
                         }
                     }
                     // CastleState
@@ -322,22 +439,22 @@ namespace Chessmate {
                     if (active == Player::White) {
                         // Kingside
                         if (castle[Castle::WhiteKingside] && isEmpty(toSquare("f1")) && isEmpty(toSquare("g1"))) {
-                            moveset.emplace_back(square, toSquare("g1"), MoveFlag::CastleStateK);
+                            moveset.emplace_back(get(square), square, toSquare("g1"), MoveFlag::CastleK);
                         }
                         // Queenside
                         if (castle[Castle::WhiteQueenside] && isEmpty(toSquare("d1")) && isEmpty(toSquare("c1"))  && isEmpty(toSquare("b1"))) {
-                            moveset.emplace_back(square, toSquare("c1"), MoveFlag::CastleStateQ);
+                            moveset.emplace_back(get(square), square, toSquare("c1"), MoveFlag::CastleQ);
                         }
                     }
                     // CastleState :: Black
                     else {
                         // Kingside
                         if (castle[Castle::BlackKingside] && isEmpty(toSquare("f8")) && isEmpty(toSquare("g8"))) {
-                            moveset.emplace_back(square, toSquare("g8"), MoveFlag::CastleStateK);
+                            moveset.emplace_back(get(square), square, toSquare("g8"), MoveFlag::CastleK);
                         }
                         // Queenside
                         if (castle[Castle::BlackQueenside] && isEmpty(toSquare("d8")) && isEmpty(toSquare("c8"))  && isEmpty(toSquare("b8"))) {
-                            moveset.emplace_back(square, toSquare("c8"), MoveFlag::CastleStateQ);
+                            moveset.emplace_back(get(square), square, toSquare("c8"), MoveFlag::CastleQ);
                         }
                     }
                 }
@@ -366,19 +483,30 @@ namespace Chessmate {
         }
         return InvalidSquare;
     }
-    // Board :: Check :: IsSquareAttackedBy
-    bool Board::isSquareAttackedBy(Square square, Player player) const {
+    // Board :: Check :: AttackingSquares
+    List<Square> Board::getAttackingSquares(Square square, Player player) const {
+        List<Square> squares;
         // Pawn
+        // Pawn :: Normal
         if (inBoundsAndEquals(square, 1, -pawndirection[player], Piece(PieceType::Pawn, player))) {
-            return true;
+            squares.push_back(addSquare(square, 1, -pawndirection[player]));
         }
         if (inBoundsAndEquals(square, -1, -pawndirection[player], Piece(PieceType::Pawn, player))) {
-            return true;
+            squares.push_back(addSquare(square, -1, -pawndirection[player]));
+        }
+        // Pawn :: EnPassant
+        if (square == enpassant) {
+            if (inBoundsAndEquals(square, 1, 0, Piece(PieceType::Pawn, player))) {
+                squares.push_back(addSquare(square, 1, 0));
+            }
+            if (inBoundsAndEquals(square, -1, 0, Piece(PieceType::Pawn, player))) {
+                squares.push_back(addSquare(square, -1, 0));
+            }
         }
         // Knight
         for (const auto& direction : knightdirections) {
             if (inBoundsAndEquals(square, direction[0], direction[1], Piece(PieceType::Knight, player))) {
-                return true;
+                squares.push_back(addSquare(square, direction[0], direction[1]));
             }
         }
         // Bishop / Rook / Queen
@@ -391,7 +519,7 @@ namespace Chessmate {
                         }
                         else {
                             if (get(square, direction[0] * step, direction[1] * step) == Piece(type, player)) {
-                                return true;
+                                squares.push_back(addSquare(square, direction[0] * step, direction[1] * step));
                             }
                             break;
                         }
@@ -405,10 +533,13 @@ namespace Chessmate {
         // King
         for (const auto& direction : kingdirections) {
             if (inBoundsAndEquals(square, direction[0], direction[1], Piece(PieceType::King, player))) {
-                return true;
+                squares.push_back(addSquare(square, direction[0], direction[1]));
             }
         }
-        return false;
+        return squares;
+    }
+    bool Board::isSquareAttackedBy(Square square, Player player) const {
+        return getAttackingSquares(square, player).size();
     }
     // Board :: Check :: CanCaptureKing / IsKingAttacked
     bool Board::canCaptureKing() const {
@@ -472,7 +603,7 @@ namespace Chessmate {
                 line += (active == Player::White ? "White" : (active == Player::Black ? "Black" : "None"));
             }
             else if (rank == 3) {
-                line += " CastleState: ";
+                line += " Castle: ";
                 if (castle[Castle::WhiteKingside]) {
                     line += 'K';
                 }

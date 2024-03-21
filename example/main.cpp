@@ -9,7 +9,7 @@ void gameloop() {
     std::cout << "LegalMoves:" << std::endl;
     List<Move> legalmoves = game.getBoard().getLegalMoves();
     for (address i = 0; i < legalmoves.size(); ++i) {
-        std::cout << i << ": " << legalmoves[i].toString(game.getBoard().get(legalmoves[i].origin)) << std::endl;
+        std::cout << i << ": " << legalmoves[i].toAlgebraicNotation() << std::endl;
     }
     int moveindex;
     std::cin >> moveindex;
@@ -17,6 +17,12 @@ void gameloop() {
     gameloop();
 }
 int32 main(int32 argc, const char* argv[]) {
+    // Game game = fromPGN("../chessgames/game1.pgn");
+    // for (const Board& board : game.getBoardList()) {
+    //     std::cout << board.toString() << std::endl;
+    //     int32 input;
+    //     std::cin >> input;
+    // }
     CLArgs commandline = parseCommandLine(argc, argv, { { 'd', CLArgument } });
     if (commandline.isvalid) {
         if (commandline.positional.size() == 0) {

@@ -4,15 +4,19 @@ namespace Chessmate {
     // Move
     // Move :: Constructor
     Move::Move()
-        : Move(InvalidSquare, InvalidSquare, MoveFlag::None) {}
+        : Move(Piece(), InvalidSquare, InvalidSquare, MoveFlag::None) {}
     Move::Move(MoveFlag flag)
-        : Move(InvalidSquare, InvalidSquare, flag) {}
-    Move::Move(Square origin, Square target)
-        : Move(origin, target, MoveFlag::Normal) {}
-    Move::Move(Square origin, Direction filedir, Direction rankdir)
-        : Move(origin, addSquare(origin, filedir, rankdir), MoveFlag::Normal) {}
-    Move::Move(Square origin, Square target, MoveFlag flag)
-        : origin(origin), target(target), flag(flag) {}
+        : Move(Piece(), InvalidSquare, InvalidSquare, flag) {}
+    Move::Move(Piece piece, Square origin, Square target)
+        : Move(piece, origin, target, MoveFlag::Normal) {}
+    Move::Move(Piece piece, Square origin, Direction filedir, Direction rankdir)
+        : Move(piece, origin, addSquare(origin, filedir, rankdir), MoveFlag::Normal) {}
+    Move::Move(Piece piece, Square origin, Square target, MoveFlag flag)
+        : piece(piece), origin(origin), target(target), flag(flag) {}
+    // Move :: Valid
+    bool Move::isValid() const {
+        return !(piece.isEmpty() && origin == InvalidSquare && target == InvalidSquare && flag == MoveFlag::None);
+    }
     // Move :: Compare
     bool Move::operator==(const Move& other) const {
         return origin == other.origin && target == other.target && flag == other.flag;
@@ -20,35 +24,25 @@ namespace Chessmate {
     bool Move::operator!=(const Move& other) const {
         return origin != other.origin || target != other.target || flag != other.flag;
     }
-    // Move :: String
-    string Move::toString(Piece piece) const {
-        string str;
-        if (!piece.isEmpty()) {
-            str += fromPiece(piece);
-            str += ' ';
+    // Move :: Algebraic Notation (UCI Standard)
+    string Move::toAlgebraicNotation() const {
+        if (isValid()) {
+            string out = fromSquare(origin) + fromSquare(target);
+            switch (flag) {
+            case MoveFlag::PromoteN:
+                return out + "n";
+            case MoveFlag::PromoteB:
+                return out + "b";
+            case MoveFlag::PromoteR:
+                return out + "r";
+            case MoveFlag::PromoteQ:
+                return out + "q";
+            default:
+                return out;
+            }
         }
-        str += fromSquare(origin) + "->" + fromSquare(target);
-        switch (flag) {
-        case MoveFlag::Normal:
-            return str;
-        case MoveFlag::DoubleAdvance:
-            return str + " (+2)";
-        case MoveFlag::EnPassant:
-            return str + " (EP)";
-        case MoveFlag::CastleStateK:
-            return str + " (CK)";
-        case MoveFlag::CastleStateQ:
-            return str + " (CQ)";
-        case MoveFlag::PromoteN:
-            return str + " (PN)";
-        case MoveFlag::PromoteB:
-            return str + " (PB)";
-        case MoveFlag::PromoteR:
-            return str + " (PR)";
-        case MoveFlag::PromoteQ:
-            return str + " (PQ)";
-        default:
-            return "None";
+        else {
+            return "0000";
         }
     }
 }
