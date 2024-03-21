@@ -6,7 +6,7 @@ namespace Chessmate {
     enum class Player {
         None = 0, White, Black
     };
-    // GetEnemy
+    // Enemy
     Player getEnemy(Player player);
     // FromPlayer / ToPlayer
     string fromPlayer(Player player);

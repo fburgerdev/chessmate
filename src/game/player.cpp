@@ -1,7 +1,7 @@
 #include "player.hpp"
 
 namespace Chessmate {
-    // GetEnemy
+    // Enemy
     Player getEnemy(Player player) {
         switch (player) {
         case Player::White:

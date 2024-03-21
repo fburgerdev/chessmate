@@ -16,6 +16,5 @@ namespace Chessmate {
     Square addSquare(Square square, Direction filedir, Direction rankdir);
     // FromSquare / ToSquare
     string fromSquare(Square square);
-    Square toSquare(const char charsquare[2]);
     Square toSquare(const string& charsquare);
 }

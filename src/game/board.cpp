@@ -4,7 +4,7 @@
 
 namespace Chessmate {
     // Constants
-    // Constants :: PawnDirection / PawnStartingPos
+    // Constants :: Pawn
     static const PlayerValue<int32> pawndirection = { -1, 1 };
     static const PlayerValue<int32> pawnstartingpos = { 6, 1 };
     // Constants :: Direction
@@ -247,41 +247,42 @@ namespace Chessmate {
     bool Board::inBoundsAndEquals(Square square, Direction filedir, Direction rankdir, Piece piece) const {
         return inBounds(square, filedir, rankdir) && get(square, filedir, rankdir) == piece;
     }
-    // Board :: GetMoveset
+    // Board :: Move
+    // Board :: Move :: Moveset
     List<Move> Board::getMoveset() const {
-        List<Move> legalmoves;
+        List<Move> moveset;
         for (Square square = 0; square < 64; ++square) {
             if (isFriendly(square)) {
                 // Pawn
                 if (type(square) == PieceType::Pawn) {
                     // Advance
                     if (inBoundsAndEmpty(square, 0, pawndirection[active])) {
-                        legalmoves.emplace_back(square, 0, pawndirection[active]);
+                        moveset.emplace_back(square, 0, pawndirection[active]);
                         // DoubleAdvance
                         if (getRank(square) == pawnstartingpos[active] && isEmpty(square, 0, pawndirection[active] * 2)) {
-                            legalmoves.emplace_back(square, 0, pawndirection[active] * 2);
+                            moveset.emplace_back(square, 0, pawndirection[active] * 2);
                         }
                     }
                     // Capture
                     if (inBoundsAndEnemy(square, 1, pawndirection[active])) {
-                        legalmoves.emplace_back(square, 1, pawndirection[active]);
+                        moveset.emplace_back(square, 1, pawndirection[active]);
                     }
                     if (inBoundsAndEnemy(square, -1, pawndirection[active])) {
-                        legalmoves.emplace_back(square, -1, pawndirection[active]);
+                        moveset.emplace_back(square, -1, pawndirection[active]);
                     }
                     // EnPassant
                     if (inBounds(square, 1, pawndirection[active]) && addSquare(square, 1, pawndirection[active]) == enpassant) {
-                        legalmoves.emplace_back(square, enpassant);
+                        moveset.emplace_back(square, enpassant);
                     }
                     else if (inBounds(square, 1, pawndirection[active]) && addSquare(square, -1, pawndirection[active]) == enpassant) {
-                        legalmoves.emplace_back(square, enpassant);
+                        moveset.emplace_back(square, enpassant);
                     }
                 }
                 // Knight
                 else if (type(square) == PieceType::Knight) {
                     for (const auto& direction : knightdirections) {
                         if (inBounds(square, direction[0], direction[1]) && !isFriendly(square, direction[0], direction[1])) {
-                            legalmoves.emplace_back(square, direction[0], direction[1]);
+                            moveset.emplace_back(square, direction[0], direction[1]);
                         }
                     }
                 }
@@ -292,10 +293,10 @@ namespace Chessmate {
                         for (int32 step = 1; step < 8; ++step) {
                             if (inBounds(square, direction[0] * step, direction[1] * step)) {
                                 if (isEmpty(square, direction[0] * step, direction[1] * step)) {
-                                    legalmoves.emplace_back(square, direction[0] * step, direction[1] * step);
+                                    moveset.emplace_back(square, direction[0] * step, direction[1] * step);
                                 }
                                 else if (isEnemy(square, direction[0] * step, direction[1] * step)) {
-                                    legalmoves.emplace_back(square, direction[0] * step, direction[1] * step);
+                                    moveset.emplace_back(square, direction[0] * step, direction[1] * step);
                                     break;
                                 }
                                 else {
@@ -313,7 +314,7 @@ namespace Chessmate {
                     // Normal
                     for (const auto& direction : kingdirections) {
                         if (inBounds(square, direction[0], direction[1]) && !isFriendly(square, direction[0], direction[1])) {
-                            legalmoves.emplace_back(square, direction[0], direction[1]);
+                            moveset.emplace_back(square, direction[0], direction[1]);
                         }
                     }
                     // CastleState
@@ -321,30 +322,42 @@ namespace Chessmate {
                     if (active == Player::White) {
                         // Kingside
                         if (castle[Castle::WhiteKingside] && isEmpty(toSquare("f1")) && isEmpty(toSquare("g1"))) {
-                            legalmoves.emplace_back(square, toSquare("g1"), MoveFlag::CastleStateK);
+                            moveset.emplace_back(square, toSquare("g1"), MoveFlag::CastleStateK);
                         }
                         // Queenside
                         if (castle[Castle::WhiteQueenside] && isEmpty(toSquare("d1")) && isEmpty(toSquare("c1"))  && isEmpty(toSquare("b1"))) {
-                            legalmoves.emplace_back(square, toSquare("c1"), MoveFlag::CastleStateQ);
+                            moveset.emplace_back(square, toSquare("c1"), MoveFlag::CastleStateQ);
                         }
                     }
                     // CastleState :: Black
                     else {
                         // Kingside
                         if (castle[Castle::BlackKingside] && isEmpty(toSquare("f8")) && isEmpty(toSquare("g8"))) {
-                            legalmoves.emplace_back(square, toSquare("g8"), MoveFlag::CastleStateK);
+                            moveset.emplace_back(square, toSquare("g8"), MoveFlag::CastleStateK);
                         }
                         // Queenside
                         if (castle[Castle::BlackQueenside] && isEmpty(toSquare("d8")) && isEmpty(toSquare("c8"))  && isEmpty(toSquare("b8"))) {
-                            legalmoves.emplace_back(square, toSquare("c8"), MoveFlag::CastleStateQ);
+                            moveset.emplace_back(square, toSquare("c8"), MoveFlag::CastleStateQ);
                         }
                     }
                 }
             }
         }
+        return moveset;
+    }
+    // Board :: Move :: LegalMoves
+    List<Move> Board::getLegalMoves() const {
+        List<Move> legalmoves;
+        for (const Move& move : getMoveset()) {
+            Board newboard(*this, move);
+            if (!newboard.canCaptureKing()) {
+                legalmoves.emplace_back(move);
+            }
+        }
         return legalmoves;
     }
-    // Board :: FindPiece
+    // Board :: Check
+    // Board :: Check :: FindPiece
     Square Board::Board::findPiece(Piece piece) const {
         for (Square square = 0; square < 64; ++square) {
             if (get(square) == piece) {    
@@ -353,7 +366,7 @@ namespace Chessmate {
         }
         return InvalidSquare;
     }
-    // Board :: IsSquareAttackedBy
+    // Board :: Check :: IsSquareAttackedBy
     bool Board::isSquareAttackedBy(Square square, Player player) const {
         // Pawn
         if (inBoundsAndEquals(square, 1, -pawndirection[player], Piece(PieceType::Pawn, player))) {
@@ -397,18 +410,7 @@ namespace Chessmate {
         }
         return false;
     }
-    // Board :: LegalMoves
-    List<Move> Board::getLegalMoves() const {
-        List<Move> legalmoves;
-        for (const Move& move : getMoveset()) {
-            Board newboard(*this, move);
-            if (!newboard.canCaptureKing()) {
-                legalmoves.emplace_back(move);
-            }
-        }
-        return legalmoves;
-    }
-    // Board :: CanCaptureKing / IsKingAttacked
+    // Board :: Check :: CanCaptureKing / IsKingAttacked
     bool Board::canCaptureKing() const {
         return isSquareAttackedBy(findPiece(Piece(PieceType::King, getEnemy(active))), active);
     }
@@ -422,7 +424,37 @@ namespace Chessmate {
     bool Board::inCheckmate() const {
         return inCheck() && getLegalMoves().size() == 0;
     }
-    // Board :: ToString
+    // Board :: Draw
+    // Board :: Draw :: HasSamePositions (According to FIDE)
+    bool Board::hasSamePositions(const Board& other) const {
+        // SamePlayer
+        if (active != other.active) {
+            return false;
+        }
+        // SamePieces
+        for (Square square = 0; square < 64; ++square) {
+            if (get(square) != other.get(square)) {
+                return false;
+            }
+        }
+        // SameMoves (NOTE: move order is stable)
+        List<Move> legalmoves = getLegalMoves();
+        List<Move> otherlegalmoves = other.getLegalMoves();
+        if (legalmoves.size() != otherlegalmoves.size()) {
+            return false;
+        }
+        for (address i = 0; i < legalmoves.size(); ++i) {
+            if (legalmoves[i] != otherlegalmoves[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
+    // Board :: Draw :: CanClaimDraw
+    bool Board::canClaimDraw() const {
+        return 50 <= halfmove;
+    }
+    // Board :: String
     string Board::toString() const {
         // Board
         List<string> lines;
@@ -487,35 +519,6 @@ namespace Chessmate {
         }
         out += '\n';
         return out;
-    }
-    // Board :: HasSamePositions (According to FIDE)
-    bool Board::hasSamePositions(const Board& other) const {
-        // SamePlayer
-        if (active != other.active) {
-            return false;
-        }
-        // SamePieces
-        for (Square square = 0; square < 64; ++square) {
-            if (get(square) != other.get(square)) {
-                return false;
-            }
-        }
-        // SameMoves (NOTE: move order is stable)
-        List<Move> legalmoves = getLegalMoves();
-        List<Move> otherlegalmoves = other.getLegalMoves();
-        if (legalmoves.size() != otherlegalmoves.size()) {
-            return false;
-        }
-        for (address i = 0; i < legalmoves.size(); ++i) {
-            if (legalmoves[i] != otherlegalmoves[i]) {
-                return false;
-            }
-        }
-        return true;
-    }
-    // Board :: CanClaimDraw
-    bool Board::canClaimDraw() const {
-        return 50 <= halfmove;
     }
     // Board :: Iterate
     auto Board::begin() {

@@ -20,7 +20,7 @@ namespace Chessmate {
     bool Move::operator!=(const Move& other) const {
         return origin != other.origin || target != other.target || flag != other.flag;
     }
-    // Move :: ToString
+    // Move :: String
     string Move::toString(Piece piece) const {
         string str;
         if (!piece.isEmpty()) {

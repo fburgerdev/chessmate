@@ -34,27 +34,29 @@ namespace Chessmate {
         bool inBoundsAndEnemy(Square square, Direction filedir, Direction rankdir) const;
         // Square :: InBoundsAndEquals
         bool inBoundsAndEquals(Square square, Direction filedir, Direction rankdir, Piece piece) const;
-        // GetMoveset
+        // Move
+        // Move :: Moveset
         List<Move> getMoveset() const;
-        // FindPiece
-        Square findPiece(Piece piece) const;
-        // IsSquareAttackedBy
-        bool isSquareAttackedBy(Square square, Player player) const;
-        // LegalMoves
+        // Move :: LegalMoves
         List<Move> getLegalMoves() const;
-        // CanCaptureKing
+        // Check
+        // Check :: FindPiece
+        Square findPiece(Piece piece) const;
+        // Check :: IsSquareAttackedBy
+        bool isSquareAttackedBy(Square square, Player player) const;
+        // Check :: CanCaptureKing / IsKingAttacked
         bool canCaptureKing() const;
-        // IsKingAttacked
         bool isKingAttacked() const;
-        // InCheck / InCheckmate
+        // Check :: Check / Checkmate
         bool inCheck() const;
         bool inCheckmate() const;
-        // ToString
-        string toString() const;
-        // HasSamePositions (According to FIDE)
+        // Draw
+        // Draw :: HasSamePositions (According to FIDE)
         bool hasSamePositions(const Board& other) const;
-        // CanClaimDraw
+        // Draw :: CanClaimDraw
         bool canClaimDraw() const;
+        // String
+        string toString() const;
         // Iterate
         auto begin();
         const auto begin() const;

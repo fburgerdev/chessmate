@@ -16,7 +16,7 @@ namespace Chessmate {
     const Board& Game::getBoard() const {
         return m_boardhistory.top();
     }
-    // Game :: (DoMove / UndoMove)
+    // Game :: Move
     Board& Game::doMove(Move move) {
         return m_boardhistory.emplace(getBoard(), move);
     }
@@ -31,7 +31,7 @@ namespace Chessmate {
     void Game::claimDraw() {
         m_drawclaimed = true;
     }
-    // Game :: IsGameOver
+    // Game :: GameOver
     bool Game::isGameOver() const {
         return getBoard().inCheckmate() || isDraw();
     }

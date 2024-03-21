@@ -23,9 +23,6 @@ namespace Chessmate {
         str += string("87654321")[square / 8];
         return str;
     }
-    Square toSquare(const char charsquare[2]) {
-        return 8 * string("87654321").find(charsquare[1]) + string("abcdefgh").find(charsquare[0]);
-    }
     Square toSquare(const string& charsquare) {
         return 8 * string("87654321").find(charsquare[1]) + string("abcdefgh").find(charsquare[0]);
     }

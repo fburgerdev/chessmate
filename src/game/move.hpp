@@ -18,7 +18,7 @@ namespace Chessmate {
         // Compare
         bool operator==(const Move& other) const;
         bool operator!=(const Move& other) const;
-        // ToString
+        // String
         string toString(Piece piece = Piece()) const;
         // Member
         Square origin;

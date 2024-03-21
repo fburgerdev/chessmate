@@ -11,13 +11,13 @@ namespace Chessmate {
         // Board
         Board& getBoard();
         const Board& getBoard() const;
-        // DoMove / UndoMove
+        // Move
         Board& doMove(Move move);
         Board& undoMove();
         // Draw
         bool isDraw() const;
         void claimDraw();
-        // IsGameOver
+        // GameOver
         bool isGameOver() const;
     private:
         // Member
