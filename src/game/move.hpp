@@ -5,7 +5,7 @@
 namespace Chessmate {
     // MoveFlag
     enum class MoveFlag {
-        None = 0, Normal, DoubleAdvance, EnPassant, CastleK, CastleQ, PromoteN, PromoteB, PromoteR, PromoteQ, ClaimDraw
+        None = 0, Normal, DoubleAdvance, EnPassant, CastleK, CastleQ, PromoteN, PromoteB, PromoteR, PromoteQ
     };
     // Move
     struct Move {
@@ -15,6 +15,7 @@ namespace Chessmate {
         Move(Piece piece, Square origin, Square target);
         Move(Piece piece, Square origin, Direction filedir, Direction rankdir);
         Move(Piece piece, Square origin, Square target, MoveFlag flag);
+        Move(Piece piece, Square origin, Direction filedir, Direction rankdir, MoveFlag flag);
         // Valid
         bool isValid() const;
         // Compare

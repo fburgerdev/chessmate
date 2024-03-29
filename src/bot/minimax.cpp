@@ -31,10 +31,6 @@ namespace Chessmate {
             }
         }
         else {
-            if (board.canClaimDraw()) {
-                result = std::min({ Move(MoveFlag::ClaimDraw), 0 }, result);
-                beta = std::min(result.eval, beta);
-            }
             for (Move move : board.getLegalMoves()) {
                 result = std::min(maximize(Board(board, move), depth - 1, alpha, beta), result);
                 if (result.eval < alpha) {
@@ -56,10 +52,6 @@ namespace Chessmate {
             }
         }
         else {
-            if (board.canClaimDraw()) {
-                result = std::max({ Move(MoveFlag::ClaimDraw), 0 }, result);
-                alpha = std::max(result.eval, alpha);
-            }
             for (Move move : board.getLegalMoves()) {
                 result = std::max(minimize(Board(board, move), depth - 1, alpha, beta), result);
                 if (beta < result.eval) {

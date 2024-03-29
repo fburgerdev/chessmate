@@ -12,7 +12,7 @@ namespace Chessmate {
         // FEN
         void fromFEN(const string& fen);
         string toFEN() const;
-        // Algebraic Notation
+        // Algebraic Notation (UCI Standard)
         Move fromAlgebraicNotation(string notation) const;
         // Square
         // Square :: Get / Set
@@ -54,10 +54,10 @@ namespace Chessmate {
         bool inCheck() const;
         bool inCheckmate() const;
         // Draw
+        // Draw :: isDraw
+        bool isDraw() const;
         // Draw :: HasSamePositions (According to FIDE)
         bool hasSamePositions(const Board& other) const;
-        // Draw :: CanClaimDraw
-        bool canClaimDraw() const;
         // String
         string toString() const;
         // Iterate

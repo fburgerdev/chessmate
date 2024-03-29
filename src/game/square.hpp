@@ -5,8 +5,8 @@ namespace Chessmate {
     // Square / Direction
     using Square = int32;
     using Direction = int32;
-    // InvalidSquare
-    static inline constexpr Square InvalidSquare = -1;
+    // NoSquare
+    static inline constexpr Square NoSquare = -1;
     // InBounds
     bool inBounds(Square square, Direction filedir, Direction rankdir);
     // File / Rank
@@ -16,5 +16,5 @@ namespace Chessmate {
     Square addSquare(Square square, Direction filedir, Direction rankdir);
     // FromSquare / ToSquare
     string fromSquare(Square square);
-    Square toSquare(const string& charsquare);
+    Square toSquare(const string& str);
 }
