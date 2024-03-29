@@ -26,7 +26,7 @@ namespace Chessmate {
     Square toSquare(const string& str) {
         if (str.length() == 2) {
             if ('a' <= str[0] <= 'h' && '1' <= str[1] <= '8') {
-                return 8 * ('8' - str[1]) + (str[1] - 'a');
+                return 8 * ('8' - str[1]) + (str[0] - 'a');
             }
         }
         return NoSquare;
