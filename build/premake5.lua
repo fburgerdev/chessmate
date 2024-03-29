@@ -12,14 +12,17 @@ project "chessmate"
    kind "StaticLib"
    -- cpp
    language "C++"
-   cppdialect "C++20"
+   cppdialect "C++latest"
    -- file
    files {
       ROOT .. "/src/**.hpp",
       ROOT .. "/src/**.cpp",
+      ROOT .. "/vendor/**.hpp",
+      ROOT .. "/vendor/**.cpp",
    }
    includedirs {
       ROOT .. "/src",
+      ROOT .. "/vendor",
    }
    -- object
    objdir(ROOT .. "/bin")
@@ -60,7 +63,7 @@ project "example"
    kind "ConsoleApp"
    -- cpp
    language "C++"
-   cppdialect "C++20"
+   cppdialect "C++latest"
    -- file
    files {
       ROOT .. "/example/**.hpp",
