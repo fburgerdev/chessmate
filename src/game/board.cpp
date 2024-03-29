@@ -179,6 +179,9 @@ namespace Chessmate {
         if (castle[Castle::BlackQueenside]) {
             fen += 'q';
         }
+        if (fen.back() == ' ') {
+            fen += '-';
+        }
         fen += ' ';
         // EnPassant
         if (enpassant == NoSquare) {
