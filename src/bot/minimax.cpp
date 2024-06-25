@@ -3,10 +3,11 @@
 
 namespace Chessmate {
     // MinimaxResult
-    // MinimaxResult :: Constructor
+    // :: constructor
     MinimaxResult::MinimaxResult(Move move, float eval)
         : move(move), eval(eval) {}
-    // MinimaxResult :: Compare
+
+    // :: compare
     bool MinimaxResult::operator<(const MinimaxResult& other) const {
         return eval < other.eval;
     }
@@ -19,7 +20,8 @@ namespace Chessmate {
     bool MinimaxResult::operator>=(const MinimaxResult& other) const {
         return eval >= other.eval;
     }
-    // Minimize / Maximize
+
+    // minimize
     MinimaxResult minimize(const Board& board, uint32 depth, float alpha, float beta) {
         MinimaxResult result = { Move(), +1e30 };
         if (board.inCheckmate()) {
@@ -41,6 +43,7 @@ namespace Chessmate {
         }
         return result;
     }
+    // maximize
     MinimaxResult maximize(const Board& board, uint32 depth, float alpha, float beta) {
         MinimaxResult result = { Move(), -1e30 };
         if (board.inCheckmate()) {
@@ -62,8 +65,8 @@ namespace Chessmate {
         }
         return result;
     }
-    // Minimax
+    // minimax
     MinimaxResult minimax(const Board& board, uint32 depth) {
-        return maximize(board, depth, -1e30, 1e30);
+        return maximize(board, depth, -1e30, +1e30);
     }
 }

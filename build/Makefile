@@ -10,18 +10,15 @@ endif
 
 ifeq ($(config),debug)
   chessmate_config = debug
-  example_config = debug
 endif
-ifeq ($(config),fast)
-  chessmate_config = fast
-  example_config = fast
+ifeq ($(config),release)
+  chessmate_config = release
 endif
 ifeq ($(config),dist)
   chessmate_config = dist
-  example_config = dist
 endif
 
-PROJECTS := chessmate example
+PROJECTS := chessmate
 
 .PHONY: all clean help $(PROJECTS) 
 
@@ -33,28 +30,20 @@ ifneq (,$(chessmate_config))
 	@${MAKE} --no-print-directory -C . -f chessmate.make config=$(chessmate_config)
 endif
 
-example: chessmate
-ifneq (,$(example_config))
-	@echo "==== Building example ($(example_config)) ===="
-	@${MAKE} --no-print-directory -C . -f example.make config=$(example_config)
-endif
-
 clean:
 	@${MAKE} --no-print-directory -C . -f chessmate.make clean
-	@${MAKE} --no-print-directory -C . -f example.make clean
 
 help:
 	@echo "Usage: make [config=name] [target]"
 	@echo ""
 	@echo "CONFIGURATIONS:"
 	@echo "  debug"
-	@echo "  fast"
+	@echo "  release"
 	@echo "  dist"
 	@echo ""
 	@echo "TARGETS:"
 	@echo "   all (default)"
 	@echo "   clean"
 	@echo "   chessmate"
-	@echo "   example"
 	@echo ""
 	@echo "For more information, see https://github.com/premake/premake-core/wiki"

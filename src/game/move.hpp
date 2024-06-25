@@ -9,24 +9,27 @@ namespace Chessmate {
     };
     // Move
     struct Move {
-        // Constructor
+        // constructor
         Move();
         Move(MoveFlag flag);
         Move(Piece piece, Square origin, Square target);
         Move(Piece piece, Square origin, Direction filedir, Direction rankdir);
         Move(Piece piece, Square origin, Square target, MoveFlag flag);
         Move(Piece piece, Square origin, Direction filedir, Direction rankdir, MoveFlag flag);
-        // Valid
+
+        // isValid
         bool isValid() const;
-        // Compare
+        
+        // compare
         bool operator==(const Move& other) const;
         bool operator!=(const Move& other) const;
-        // Algebraic Notation (UCI Standard)
+        
+        // toAlgebraicNotation (Algebraic Notation - UCI Standard)
         string toAlgebraicNotation() const;
-        // Member
+        
+        // member
         Piece piece;
-        Square origin;
-        Square target;
+        Square origin, target;
         MoveFlag flag;
     };
 }

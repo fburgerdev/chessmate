@@ -2,105 +2,45 @@
 ROOT = ".."
 -- workspace
 workspace "chessmate"
+   -- build options
+   configurations { "debug", "release", "dist" }
    -- startproject
-   startproject "example"
-   -- configuration
-   configurations { "debug", "fast", "dist" }
--- library
-project "chessmate"
-   -- staticlib
-   kind "StaticLib"
+   startproject "chessmate"
    -- cpp
    language "C++"
-   cppdialect "C++latest"
-   -- file
-   files {
-      ROOT .. "/src/**.hpp",
-      ROOT .. "/src/**.cpp",
-      ROOT .. "/vendor/**.hpp",
-      ROOT .. "/vendor/**.cpp",
-   }
-   includedirs {
-      ROOT .. "/src",
-      ROOT .. "/vendor",
-   }
-   -- object
-   objdir(ROOT .. "/bin")
-   -- debugger
+   cppdialect "C++Latest"
+   -- debug
    debugger "GDB"
    -- config
    -- config :: debug
    filter "configurations:debug"
-      -- symbols
       symbols "On"
-      -- define
       defines { "CONFIG_DEBUG" }
-      -- target
-      targetdir(ROOT .. "/lib/debug")
    -- config :: fast
-   filter "configurations:fast"
-      -- optimize
+   filter "configurations:release"
       optimize "On"
-      -- define
-      defines { "CONFIG_FAST" }
-      -- option
+      defines { "CONFIG_RELEASE" }
       linkoptions{ "-Ofast" }
-      -- target
-      targetdir(ROOT .. "/lib/fast")
    -- config :: dist
    filter "configurations:dist"
-      -- optimize
       optimize "On"
-      -- define
       defines { "CONFIG_DIST" }
-      -- option
       linkoptions { "-Ofast" }
-      -- target
-      targetdir(ROOT .. "/lib/dist")
--- example
-project "example"
-   -- console
-   kind "ConsoleApp"
-   -- cpp
-   language "C++"
-   cppdialect "C++latest"
-   -- file
-   files {
-      ROOT .. "/example/**.hpp",
-      ROOT .. "/example/**.cpp",
-   }
+-- project lib
+project "chessmate"
+   -- static library
+   kind "StaticLib"
+   -- include directories
    includedirs {
-      ROOT .. "/example",
+      ROOT,
       ROOT .. "/src",
+      ROOT .. "/modules/*/include",
+      ROOT .. "/vendor/*/include"
    }
-   -- link
-   links { "chessmate" }
-   -- object
-   objdir(ROOT .. "/bin/obj")
-   -- debug
-   debugger "GDB"
-   -- config
-   filter "configurations:debug"
-      -- symbols
-      symbols "On"
-      defines { "CONFIG_DEBUG" }
-      -- target
-      targetdir(ROOT .. "/bin/debug")
-   filter "configurations:fast"
-      -- optimize
-      optimize "On"
-      -- define
-      defines { "CONFIG_FAST" }
-      -- option
-      linkoptions { "-Ofast" }
-      -- target
-      targetdir(ROOT .. "/bin/fast")
-   filter "configurations:dist"
-      -- optimize
-      optimize "On"
-      -- define
-      defines { "CONFIG_DIST" }
-      -- option
-      linkoptions { "-static", "-Ofast" }
-      -- target
-      targetdir(ROOT .. "/bin/dist")
+   -- files
+   files {
+      ROOT .. "/src/**",
+   }
+   -- binaries
+   targetdir(ROOT .. "/lib/%{cfg.buildcfg}")
+   objdir(ROOT .. "/bin/%{cfg.system}_%{cfg.buildcfg}")

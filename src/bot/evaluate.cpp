@@ -1,7 +1,7 @@
 #include "evaluate.hpp"
 
 namespace Chessmate {
-    // PieceType
+    // evaluatePieceType
     float evaluatePieceType(PieceType type) {
         switch (type) {
         case PieceType::Pawn:
@@ -18,13 +18,15 @@ namespace Chessmate {
             return 0;
         }
     }
-    // Piece
+
+    // evaluatePiece
     float evaluatePiece(Piece piece, Player active) {
         return (piece.player == active ? +1 : -1) * evaluatePieceType(piece.type);
     }
-    // Square
-    // Square :: Pawn
-    static constexpr Array<float, 64> pawnboard = {
+    
+    // square
+    // :: pawn
+    static constexpr Array<float, 64> PawnBoard = {
         +00, +00, +00, +00, +00, +00, +00, +00,
         +50, +50, +50, +50, +50, +50, +50, +50,
         +10, +10, +20, +30, +30, +20, +10, +10,
@@ -34,8 +36,8 @@ namespace Chessmate {
         +05, +10, +10, -20, -20, +10, +10, +05,
         +00, +00, +00, +00, +00, +00, +00, +00
     };
-    // Square :: Knight
-    static constexpr Array<float, 64> knightboard = {
+    // :: knight
+    static constexpr Array<float, 64> KnightBoard = {
         -50, -40, -30, -30, -30, -30, -40, -50,
         -40, -20, +00, +00, +00, +00, -20, -40,
         -30, +00, +10, +15, +15, +10, +00, -30,
@@ -45,8 +47,8 @@ namespace Chessmate {
         -40, -20, +00, +05, +05, +00, -20, -40,
         -50, -40, -30, -30, -30, -30, -40, -50
     };
-    // Square :: Bishop
-    static constexpr Array<float, 64> bishopboard = {
+    // :: bishop
+    static constexpr Array<float, 64> BishopBoard = {
         -20, -10, -10, -10, -10, -10, -10, -20,
         -10, +00, +00, +00, +00, +00, +00, -10,
         -10, +00, +05, +10, +10, +05, +00, -10,
@@ -56,8 +58,8 @@ namespace Chessmate {
         -10, +05, +00, +00, +00, +00, +05, -10,
         -20, -10, -10, -10, -10, -10, -10, -20
     };
-    // Square :: Rook
-    static constexpr Array<float, 64> rookboard = {
+    // :: rook
+    static constexpr Array<float, 64> RookBoard = {
         +00, +00, +00, +00, +00, +00, +00, +00,
         +05, +10, +10, +10, +10, +10, +10, +05,
         -05, +00, +00, +00, +00, +00, +00, -05,
@@ -67,8 +69,8 @@ namespace Chessmate {
         -05, +00, +00, +00, +00, +00, +00, -05,
         +00, +00, +00, +05, +05, +00, +00, +00
     };
-    // Square :: Queen
-    static constexpr Array<float, 64> queenboard = {
+    // :: queen
+    static constexpr Array<float, 64> QueenBoard = {
         -20, -10, -10, -05, -05, -10, -10, -20,
         -10, +00, +00, +00, +00, +00, +00, -10,
         -10, +00, +05, +05, +05, +05, +00, -10,
@@ -78,9 +80,8 @@ namespace Chessmate {
         -10, +00, +05, +00, +00, +00, +00, -10,
         -20, -10, -10, -05, -05, -10, -10, -20
     };
-    // Square :: King
-    // Square :: King :: Midgame
-    static constexpr Array<float, 64> midgamekingboard = {
+    // :: king
+    static constexpr Array<float, 64> MidgameKingBoard = {
         -30, -40, -40, -50, -50, -40, -40, -30,
         -30, -40, -40, -50, -50, -40, -40, -30,
         -30, -40, -40, -50, -50, -40, -40, -30,
@@ -90,8 +91,7 @@ namespace Chessmate {
         +20, +20, +00, +00, +00, +00, +20, +20,
         +20, +30, +10, +00, +00, +10, +30, +20
     };
-    // Square :: King :: Endgame
-    static constexpr Array<float, 64> endgamekingboard = {
+    static constexpr Array<float, 64> EndgameKingBoard = {
         -50, -40, -30, -20, -20, -30, -40, -50,
         -30, -20, -10, +00, +00, -10, -20, -30,
         -30, -10, +20, +30, +30, +20, -10, -30,
@@ -101,27 +101,29 @@ namespace Chessmate {
         -30, -30, +00, +00, +00, +00, -30, -30,
         -50, -30, -30, -30, -30, -30, -30, -50
     };
+    // :: evaluateSquare
     float evaluateSquare(Square square, const Board& board) {
         const float sign = (board.isFriendly(square) ? +1 : -1);
         const int32 index = (board.active == Player::White ? square : 63 - square);
         switch (board.type(square)) {
         case PieceType::Pawn:
-            return sign * pawnboard.at(index);
+            return sign * PawnBoard.at(index);
         case PieceType::Knight:
-            return sign * knightboard.at(index);
+            return sign * KnightBoard.at(index);
         case PieceType::Bishop:
-            return sign * bishopboard.at(index);
+            return sign * BishopBoard.at(index);
         case PieceType::Rook:
-            return sign * rookboard.at(index);
+            return sign * RookBoard.at(index);
         case PieceType::Queen:
-            return sign * queenboard.at(index);
+            return sign * QueenBoard.at(index);
         case PieceType::King:
-            return sign * (board.fullmove < 20 ? midgamekingboard : endgamekingboard).at(index);
+            return sign * (board.fullMoves < 20 ? MidgameKingBoard : EndgameKingBoard).at(index);
         default:
             return 0;
         }
     }
-    // Board
+
+    // evaluateBoard
     float evaluateBoard(const Board& board) {
         float eval = 0;
         for (Square square = 0; square < 64; ++square) {

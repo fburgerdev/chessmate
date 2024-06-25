@@ -2,12 +2,12 @@
 #include "game/board.hpp"
 
 namespace Chessmate {
-    // PieceType
+    // evaluatePieceType
     float evaluatePieceType(PieceType type);
-    // Piece
+    // evaluatePiece
     float evaluatePiece(Piece piece, Player active);
-    // Square
+    // evaluateSquare
     float evaluateSquare(Square square, const Board& board);
-    // Board
+    // evaluateBoard
     float evaluateBoard(const Board& board);
 }

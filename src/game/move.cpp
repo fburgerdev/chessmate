@@ -1,8 +1,8 @@
 #include "move.hpp"
+#include "parse.hpp"
 
 namespace Chessmate {
-    // Move
-    // Move :: Constructor
+    // constructor
     Move::Move()
         : Move(Piece(), NoSquare, NoSquare, MoveFlag::None) {}
     Move::Move(MoveFlag flag)
@@ -15,21 +15,24 @@ namespace Chessmate {
         : piece(piece), origin(origin), target(target), flag(flag) {}
     Move::Move(Piece piece, Square origin, Direction filedir, Direction rankdir, MoveFlag flag)
         : Move(piece, origin, addSquare(origin, filedir, rankdir), flag) {}
-    // Move :: Valid
+    
+    // isValid
     bool Move::isValid() const {
         return !(piece.isEmpty() && origin == NoSquare && target == NoSquare && flag == MoveFlag::None);
     }
-    // Move :: Compare
+
+    // compare
     bool Move::operator==(const Move& other) const {
         return origin == other.origin && target == other.target && flag == other.flag;
     }
     bool Move::operator!=(const Move& other) const {
         return origin != other.origin || target != other.target || flag != other.flag;
     }
-    // Move :: Algebraic Notation (UCI Standard)
+    
+    // toAlgebraicNotation (Algebraic Notation - UCI Standard)
     string Move::toAlgebraicNotation() const {
         if (isValid()) {
-            string out = fromSquare(origin) + fromSquare(target);
+            string out = Parse::fromSquare(origin) + Parse::fromSquare(target);
             switch (flag) {
             case MoveFlag::PromoteN:
                 return out + "n";

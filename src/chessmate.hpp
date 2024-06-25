@@ -1,0 +1,12 @@
+#pragma once
+// game
+#include "game/board.hpp"
+#include "game/castle.hpp"
+#include "game/move.hpp"
+#include "game/parse.hpp"
+#include "game/piece.hpp"
+#include "game/player.hpp"
+#include "game/square.hpp"
+// bot
+#include "bot/evaluate.hpp"
+#include "bot/minimax.hpp"

@@ -14,9 +14,9 @@ ifeq ($(config),debug)
   RESCOMP = windres
   TARGETDIR = ../lib/debug
   TARGET = $(TARGETDIR)/libchessmate.a
-  OBJDIR = ../bin/debug
+  OBJDIR = ../bin/linux_debug
   DEFINES += -DCONFIG_DEBUG
-  INCLUDES += -I../src -I../vendor
+  INCLUDES += -I.. -I../src -I../vendor/nlohmann/include
   FORCE_INCLUDE +=
   ALL_CPPFLAGS += $(CPPFLAGS) -MD -MP $(DEFINES) $(INCLUDES)
   ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -g
@@ -37,13 +37,13 @@ all: prebuild prelink $(TARGET)
 
 endif
 
-ifeq ($(config),fast)
+ifeq ($(config),release)
   RESCOMP = windres
-  TARGETDIR = ../lib/fast
+  TARGETDIR = ../lib/release
   TARGET = $(TARGETDIR)/libchessmate.a
-  OBJDIR = ../bin/fast
-  DEFINES += -DCONFIG_FAST
-  INCLUDES += -I../src -I../vendor
+  OBJDIR = ../bin/linux_release
+  DEFINES += -DCONFIG_RELEASE
+  INCLUDES += -I.. -I../src -I../vendor/nlohmann/include
   FORCE_INCLUDE +=
   ALL_CPPFLAGS += $(CPPFLAGS) -MD -MP $(DEFINES) $(INCLUDES)
   ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -O2
@@ -68,9 +68,9 @@ ifeq ($(config),dist)
   RESCOMP = windres
   TARGETDIR = ../lib/dist
   TARGET = $(TARGETDIR)/libchessmate.a
-  OBJDIR = ../bin/dist
+  OBJDIR = ../bin/linux_dist
   DEFINES += -DCONFIG_DIST
-  INCLUDES += -I../src -I../vendor
+  INCLUDES += -I.. -I../src -I../vendor/nlohmann/include
   FORCE_INCLUDE +=
   ALL_CPPFLAGS += $(CPPFLAGS) -MD -MP $(DEFINES) $(INCLUDES)
   ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -O2
@@ -95,12 +95,16 @@ OBJECTS := \
 	$(OBJDIR)/evaluate.o \
 	$(OBJDIR)/minimax.o \
 	$(OBJDIR)/board.o \
+	$(OBJDIR)/board_fen.o \
+	$(OBJDIR)/board_move.o \
+	$(OBJDIR)/board_rules.o \
+	$(OBJDIR)/board_square.o \
 	$(OBJDIR)/castle.o \
 	$(OBJDIR)/move.o \
+	$(OBJDIR)/parse.o \
 	$(OBJDIR)/piece.o \
 	$(OBJDIR)/player.o \
 	$(OBJDIR)/square.o \
-	$(OBJDIR)/gameserver.o \
 
 RESOURCES := \
 
@@ -168,10 +172,25 @@ $(OBJDIR)/minimax.o: ../src/bot/minimax.cpp
 $(OBJDIR)/board.o: ../src/game/board.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/board_fen.o: ../src/game/board_fen.cpp
+	@echo $(notdir $<)
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/board_move.o: ../src/game/board_move.cpp
+	@echo $(notdir $<)
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/board_rules.o: ../src/game/board_rules.cpp
+	@echo $(notdir $<)
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/board_square.o: ../src/game/board_square.cpp
+	@echo $(notdir $<)
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/castle.o: ../src/game/castle.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/move.o: ../src/game/move.cpp
+	@echo $(notdir $<)
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/parse.o: ../src/game/parse.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/piece.o: ../src/game/piece.cpp
@@ -181,9 +200,6 @@ $(OBJDIR)/player.o: ../src/game/player.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/square.o: ../src/game/square.cpp
-	@echo $(notdir $<)
-	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/gameserver.o: ../src/gameserver.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 

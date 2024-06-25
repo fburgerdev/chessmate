@@ -4,20 +4,23 @@
 namespace Chessmate {
     // MinimaxResult
     struct MinimaxResult {
-        // Constructor
+        // constructor
         MinimaxResult(Move move, float eval);
-        // Compare
+        
+        // compare
         bool operator<(const MinimaxResult& other) const;
         bool operator<=(const MinimaxResult& other) const;
         bool operator>(const MinimaxResult& other) const;
         bool operator>=(const MinimaxResult& other) const;
-        // Member
+
+        // move / eval
         Move move;
         float eval;
     };
-    // Minimize / Maximize
+    
+    // minimize / maximize
     MinimaxResult minimize(const Board& board, uint32 depth, float alpha, float beta);
     MinimaxResult maximize(const Board& board, uint32 depth, float alpha, float beta);
-    // Minimax
+    // minimax
     MinimaxResult minimax(const Board& board, uint32 depth);
 }

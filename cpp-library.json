@@ -1,0 +1,14 @@
+{
+    "project": "chessmate",
+    "author": "Florian Burger (git@fburgerdev)",
+    "namespace": "Chessmate",
+    
+    "tests": {
+        "test": {
+            "files": [ "test.cpp" ]
+        },
+        "gameserver": {
+            "files": [ "test_gameserver.cpp", "gameserver.cpp" ]
+        }
+    }
+}

@@ -8,21 +8,18 @@ namespace Chessmate {
     };
     // Piece
     struct Piece {
-        // Constructor
+        // construtor
         Piece();
         Piece(PieceType type, Player player);
-        // IsEmpty
+
+        // isEmpty
         bool isEmpty() const;
-        // Compare
-        bool operator==(const Piece& other) const;
-        bool operator!=(const Piece& other) const;
-        // Member
+        
+        // operator<=>
+        auto operator<=>(const Piece& other) const = default;
+
+        // type / player
         PieceType type;
         Player player;
     };
-    // ToPieceType
-    PieceType toPieceType(char ch);
-    // ToPiece / FromPiece
-    Piece toPiece(char ch);
-    char fromPiece(Piece piece);
 }
