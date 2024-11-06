@@ -5,15 +5,15 @@ namespace Chessmate {
     float evaluatePieceType(PieceType type) {
         switch (type) {
         case PieceType::Pawn:
-            return 1;
+            return 100;
         case PieceType::Knight:
-            return 3;
+            return 300;
         case PieceType::Bishop:
-            return 3.25;
+            return 325;
         case PieceType::Rook:
-            return 5;
+            return 500;
         case PieceType::Queen:
-            return 9;
+            return 900;
         default:
             return 0;
         }

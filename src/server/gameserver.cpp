@@ -29,7 +29,7 @@ namespace Chessmate {
     static string s_Directory = "./";
     // :: getFilepath
     string getFilepath(int32 gameid) {
-        return s_Directory + std::to_string(gameid) + ".game";
+        return s_Directory + std::to_string(gameid) + ".game.json";
     }
 
     // openGame
@@ -101,7 +101,7 @@ namespace Chessmate {
         return openGame(gameID, [&](nlohmann::json json) {
             nlohmann::json response;
             Board board(json["gameState"]["currentFEN"]);
-            if (0 < json["playerWhite"] && 0 < json["playerBlack"]) {
+            if (json["status"] == "inGame") {
                 string playerKey = (board.active == Player::White ? "playerWhite" : "playerBlack");
                 if (json[playerKey] == playerID) {
                     Move move = board.fromAlgebraicNotation(moveString);
@@ -121,9 +121,13 @@ namespace Chessmate {
                     response["error"] = "wrong playerid provided";
                 }
             }
-            else {
+            else if (json["status"] == "prepare"){
                 response["success"] = false;
                 response["error"] = "game not full";
+            }
+            else if (json["status"] == "checkmate" || json["status"] == "drwa"){
+                response["success"] = false;
+                response["error"] = "game over";
             }
             return nlohmann::to_string(response);
         });
@@ -184,10 +188,10 @@ namespace Chessmate {
                 }
             }
 
-            // moveList
-            response["gameState"]["moveList"] = nlohmann::json::array();
+            // history
+            response["gameState"]["history"] = nlohmann::json::array();
             for (const string& move : json["gameState"]["moves"]) {
-                response["gameState"]["moveList"].emplace_back(move);
+                response["gameState"]["history"].emplace_back(move);
             }
             // legalMoves
             response["gameState"]["legalMoves"] = nlohmann::json::array();
